@@ -430,6 +430,7 @@ POOL_DEVICE="${DISK}-part${POOL_PART}"
 KEYFILE="/etc/zfs/${POOL_NAME}.key"
 
 log "Planned configuration"
+if [ -z "$NO_ENC" ]; then ENC_MSG="  Encryption       : ${ENCRYPTION_ALGO}, native, passphrase (mandatory)"; else ENC_MSG=""; fi
 cat <<EOF
   Disk             : ${DISK}
                      -> ${DISK_REAL}  ($(lsblk -dno SIZE,MODEL "$DISK_REAL"))
@@ -438,7 +439,7 @@ cat <<EOF
   Swap             : $( [[ "$SWAP_MODE" != none ]] && echo "${SWAP_DEVICE}   ${SWAP_SIZE_MIB} MiB  mode=${SWAP_MODE}" || echo "disabled" )
   Pool vdev        : ${POOL_DEVICE}
   Pool             : ${POOL_NAME}  ashift=${ASHIFT}  compression=${COMPRESSION}
-  Encryption       : ${ENCRYPTION_ALGO}, native, passphrase (mandatory)
+${ENC_MSG}
   Boot environment : ${POOL_NAME}/ROOT/${BE_NAME}
   Baseline BE      : $( [[ "$BASELINE_MODE" == none ]] && echo "disabled" || echo "${POOL_NAME}/ROOT/${BASELINE_NAME} (${BASELINE_MODE})" )
 
@@ -629,6 +630,8 @@ if zpool import 2>/dev/null | awk '$1 == "pool:" { print $2 }' | grep -qx "$POOL
 	fi
 fi
 
+if [ -z "$NO_ENC" ]; then 
+
 #==============================================================================
 # [GUIDE] ZFS pool creation (encrypted variant)
 #==============================================================================
@@ -654,7 +657,29 @@ zpool_opts=(
 	-O "keylocation=file://${KEYFILE}"
 	-O keyformat=passphrase
 	-o autotrim=on
-)
+);
+else
+
+#==============================================================================
+# [GUIDE] ZFS pool creation (unencrypted variant)
+#==============================================================================
+
+log "Writing pool key to ${KEYFILE}"
+mkdir -p /etc/zfs
+
+log "Creating unencrypted zpool ${POOL_NAME} on ${POOL_DEVICE}"
+zpool_opts=(
+	-f
+	-o "ashift=${ASHIFT}"
+	-O "compression=${COMPRESSION}"
+	-O acltype=posixacl
+	-O xattr=sa
+	-O relatime=off
+	-O atime=off
+	-O logbias=throughput
+	-o autotrim=on
+fi
+
 zpool create "${zpool_opts[@]}" -m none "$POOL_NAME" "$POOL_DEVICE"
 
 # A pool's GUID is unique and unambiguous where its name is not. Everything
