@@ -187,6 +187,8 @@ chmod +x *.sh
 **Debian — ZFSBootMenu:**
 
 ```bash
+### Remove NO_ENC=YES if you DO want encryption
+NO_ENC=YES \
 DISK=/dev/disk/by-id/nvme-Samsung_SSD_990_PRO_1TB_S1A2B3C4 \
 TARGET_HOSTNAME=workstation \
 ADMIN_USER=alireza \
