@@ -680,6 +680,7 @@ zpool_opts=(
 	-O atime=off
 	-O logbias=throughput
 	-o autotrim=on
+);
 fi
 
 zpool create "${zpool_opts[@]}" -m none "$POOL_NAME" "$POOL_DEVICE"
