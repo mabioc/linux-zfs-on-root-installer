@@ -763,7 +763,7 @@ if [[ "$IMPORTED_GUID" != "$POOL_GUID" ]]; then
 	die "Imported pool GUID '${IMPORTED_GUID}' does not match the pool just created ('${POOL_GUID}')."
 fi
 
-zfs load-key "$POOL_NAME"
+if [ -z "$NO_ENC" ]; then zfs load-key "$POOL_NAME"; fi
 zfs mount "${POOL_NAME}/ROOT/${BE_NAME}"
 zfs mount -a
 
