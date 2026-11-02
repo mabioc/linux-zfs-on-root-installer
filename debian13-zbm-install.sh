@@ -484,8 +484,10 @@ if [[ -z "$ZFS_PASSPHRASE" ]]; then
 	# your keyboard, since you will need to type it in to unlock the pool on
 	# boot." ZFSBootMenu uses its own minimal keymap.
 	echo "  Typed inside ZFSBootMenu at every boot, on a basic keymap."
-	echo "  Prefer unshifted ASCII you can find blind."
-	prompt_pass ZFS_PASSPHRASE "ZFS pool passphrase" 8
+        if [ -z "$NO_ENC" ]; then
+	   echo "  Prefer unshifted ASCII you can find blind."
+	   prompt_pass ZFS_PASSPHRASE "ZFS pool passphrase" 
+       fi 
 fi
 
 #==============================================================================
