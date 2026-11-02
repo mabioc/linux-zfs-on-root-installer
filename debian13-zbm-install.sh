@@ -793,8 +793,10 @@ log "Copying host files into the new install"
 mkdir -p /mnt/etc/zfs
 cp /etc/hostid /mnt/etc/
 cp /etc/resolv.conf /mnt/etc/
-cp "$KEYFILE" "/mnt${KEYFILE}"
-chmod 000 "/mnt${KEYFILE}"
+if [ -z "$NO_ENC" ]; then
+   cp "$KEYFILE" "/mnt${KEYFILE}";
+   chmod 000 "/mnt${KEYFILE}";
+fi
 
 log "Preparing chroot mounts"
 mount -t proc  proc  /mnt/proc
@@ -818,7 +820,7 @@ gen_sources target > /mnt/root/sources.list.new
 {
 	printf 'POOL_NAME=%q\n'              "$POOL_NAME"
 	printf 'BE_NAME=%q\n'                "$BE_NAME"
-	printf 'KEYFILE=%q\n'                "$KEYFILE"
+if [ -z "$NO_ENC" ]; then	printf 'KEYFILE=%q\n'                "$KEYFILE"; fi;
 	printf 'TARGET_HOSTNAME=%q\n'        "$TARGET_HOSTNAME"
 	printf 'ADMIN_USER=%q\n'             "$ADMIN_USER"
 	printf 'ADMIN_FULLNAME=%q\n'         "$ADMIN_FULLNAME"
